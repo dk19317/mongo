@@ -1,0 +1,118 @@
+
+TITLE:-Cursors
+mysql> use aman;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> create table rollcall(roll_no int, name varchar(20), address varchar(20));
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> create table n_rollcall(roll_no int, name varchar(20), address varchar(20));
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> insert into rollcall values(1, 'Ramesh', 'Wagholi');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> insert into rollcall values(2, 'Raju', 'Katraj');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into rollcall values(3, 'Raj', 'Narhe');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> insert into rollcall values(4, 'Rakesh', 'Camp');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> insert into rollcall values(5, 'Ranvijay', 'Dehu');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> delimiter
+ERROR:
+DELIMITER must be followed by a 'delimiter' character or string
+mysql> delimiter //
+mysql> //
+ERROR:
+No query specified
+
+mysql> delimiter
+ERROR:
+DELIMITER must be followed by a 'delimiter' character or string
+mysql> delimiter //
+mysql> create procedure p3(in r1 int)
+    -> begin
+    -> declare r2 int;
+    -> declare exit_loop boolean;
+    -> declare c1 cursor for select roll_no from rollcall where roll_no>r1;
+    -> declare continue handler for not found set exit_loop=true;
+    -> open c1;
+    -> e_loop:loop
+    -> fetch c1 into r2;
+    -> if not exists(select * from n_rollcall where roll_no=r2)
+    -> then
+    -> insert into n_rollcall select * from rollcall where roll_no=r2;
+    -> end if;
+    -> if exit_loop
+    -> then
+    -> close c1;
+    -> leave e_loop;
+    -> end if;
+    -> end loop e_loop;
+    -> end
+    -> //
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> call p3(3);
+    -> //
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> select * from n_rollcall;
+    -> //
++---------+----------+---------+
+| roll_no | name     | address |
++---------+----------+---------+
+|       4 | Rakesh   | Camp    |
+|       5 | Ranvijay | Dehu    |
++---------+----------+---------+
+2 rows in set (0.00 sec)
+
+mysql> call p3(0);
+    -> //
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> select * from n_rollcall;
+    -> //
++---------+----------+---------+
+| roll_no | name     | address |
++---------+----------+---------+
+|       4 | Rakesh   | Camp    |
+|       5 | Ranvijay | Dehu    |
+|       1 | Ramesh   | Wagholi |
+|       2 | Raju     | Katraj  |
+|       3 | Raj      | Narhe   |
++---------+----------+---------+
+5 rows in set (0.00 sec)
+
+mysql> insert into rollcall values(6, 'Vishal', 'Pune');
+    -> //
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call p3(4);
+    -> //
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> select * from n_rollcall;
+    -> //
++---------+----------+---------+
+| roll_no | name     | address |
++---------+----------+---------+
+|       4 | Rakesh   | Camp    |
+|       5 | Ranvijay | Dehu    |
+|       1 | Ramesh   | Wagholi |
+|       2 | Raju     | Katraj  |
+|       3 | Raj      | Narhe   |
+|       6 | Vishal   | Pune    |
++---------+----------+---------+
+6 rows in set (0.00 sec)
+
+mysql>
+
