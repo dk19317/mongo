@@ -1,0 +1,80 @@
+mysql> create database lion;
+Query OK, 1 row affected (0.02 sec)
+
+mysql> use lion;
+Database changed
+
+mysql> create  table library(id int, name varchar(50), dept_no int);
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> insert into library values(1,'aman',1),
+    -> (2,'nitin',15),
+    -> (3,'amit',8),
+    -> (4,'adit',7),
+    -> (5,'rashmi',1);
+Query OK, 5 rows affected (0.03 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> create table library_audit(operation varchar(50), old_id int, old_name varchar(50), old_dept_no int);
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> delimiter //
+mysql> create trigger library_delete_trigger
+    -> after delete on library
+    -> for each row
+    -> begin
+    -> insert into library_audit(operation,old_id,old_name,old_dept_no)
+    -> values('delete',old.id,old.name,old.dept_no);
+    -> end;//
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> create trigger library_update_trigger
+    -> after update on library
+    -> for each row
+    -> begin
+    -> insert into library_audit(operation,old_id,old_name,old_dept_no)
+    -> values('update',old.id,old.name,old.dept_no);
+    -> end;//
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> update library set name = 'arman' where dept_no = 7;
+    -> //
+Query OK, 1 row affected (0.02 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select * from library_audit;//
++-----------+--------+----------+-------------+
+| operation | old_id | old_name | old_dept_no |
++-----------+--------+----------+-------------+
+| update    |      4 | adit     |           7 |
++-----------+--------+----------+-------------+
+1 row in set (0.00 sec)
+
+mysql> delete from  library where id = 3;
+    -> //
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from library_audit;//
++-----------+--------+----------+-------------+
+| operation | old_id | old_name | old_dept_no |
++-----------+--------+----------+-------------+
+| update    |      4 | adit     |           7 |
+| delete    |      3 | amit     |           8 |
++-----------+--------+----------+-------------+
+2 rows in set (0.00 sec)
+
+mysql> select * from library;
+    -> //
++------+--------+---------+
+| id   | name   | dept_no |
++------+--------+---------+
+|    1 | aman   |       1 |
+|    2 | nitin  |      15 |
+|    4 | arman  |       7 |
+|    5 | rashmi |       1 |
++------+--------+---------+
+4 rows in set (0.00 sec)
+
+mysql> 
+
+
