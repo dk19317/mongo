@@ -1,0 +1,180 @@
+
+TITLE:-PL/SQL Stored Procedure and Stored Function
+mysql> create aman
+    -> ;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'aman' at line 1
+mysql> create database aman
+    -> ;
+Query OK, 1 row affected (0.01 sec)
+
+mysql> use aman;
+Database changed
+mysql> SET GLOBAL log_bin_trust_function_creators = 1;
+Query OK, 0 rows affected, 1 warning (0.00 sec)
+
+mysql> create table marks(roll_no int, name varchar(20), total_marks varchar(20));
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> create table result(roll_no int, name varchar(20), class varchar(20));
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> insert into marks values(1, 'Aman', '1400');
+Query OK, 1 row affected (0.03 sec)
+
+mysql> insert into marks values(2, 'Arman', '980');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> insert into marks values(3, 'Raju', '880');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> insert into marks values(4, 'Rajeev', '500');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> insert into marks values(5, 'akshay', '740');
+Query OK, 1 row affected (0.02 sec)
+
+mysql> insert into marks values(6, 'Pratik', '640');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> delimiter //
+mysql> create procedure proc_result(in marks int, out class char(20))
+    -> begin
+    -> if(marks<1500&&marks>990)
+    -> then
+    -> set class='Distinction';
+    -> end if;
+    -> if(marks<989&&marks>890)
+    -> then
+    -> set class='First Class';
+    -> end if;
+    -> if(marks<889&&marks>825)
+    -> then
+    -> set class='Higher Second Class';
+    -> end if;
+    -> if(marks<824&&marks>750)
+    -> then
+    -> set class='Second Class';
+    -> end if;
+    -> if(marks<749&&marks>650)
+    -> then
+    -> set class='Passed';
+    -> end if;
+    -> if(marks<649)
+    -> then
+    -> set class='Fail';
+    -> end if;
+    -> end;
+    -> //
+Query OK, 0 rows affected, 5 warnings (0.04 sec)
+
+mysql> create function final_result(R1 int)
+    -> returns int
+    -> begin
+    -> declare fmarks integer;
+    -> declare grade varchar(20);
+    -> declare stud_name varchar(20);
+    -> select marks.total_marks, marks.name into fmarks, stud_name from marks where marks.roll_no=R1;
+    -> call proc_grade(fmarks,grade);
+    -> insert into result values(R1, stud_name, grade);
+    -> return R1;
+    -> end;
+    -> //
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> select final_result(2);
+    -> //
+ERROR 1305 (42000): PROCEDURE aman.proc_grade does not exist
+mysql> select * final_result();
+    -> //
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'final_result()' at line 1
+mysql> create function final_result(R1 int)
+    -> returns int
+    -> begin
+    -> declare fmarks integer;
+    -> declare grade varchar(20);
+    -> declare stud_name varchar(20);
+    ->     -> select marks.total_marks, marks.name into fmarks, stud_name from marks where marks.roll_no=R1;
+    -> call proc_grade(fmarks,grade);
+    -> select marks.total_marks, marks.name into fmarks, stud_name from marks where marks.roll_no=R1;
+    -> call proc_grade(fmarks,grade);
+    -> call proc_grade(fmarks,grade);
+    -> call proc_grade(fmarks,grade);
+    -> return R1;
+    -> end;
+    -> //
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '-> select marks.total_marks, marks.name into fmarks, stud_name from marks where ' at line 7
+mysql> create function final_result(R1 int)
+    -> returns int
+    -> begin
+    -> declare fmarks integer;
+    -> declare grade varchar(20);
+    -> declare stud_name varchar(20);
+    -> select marks.total_marks, marks.name into fmarks, stud_name from marks where marks.roll_no=R1;
+    -> call proc_result(fmarks, grade);
+    -> insert into result values(R1, stud_name, grade);
+    -> return R1;
+    -> end;
+    -> //
+ERROR 1304 (42000): FUNCTION final_result already exists
+mysql> create function fresult(R1 int)
+    -> returns int
+    -> begin
+    -> declare fmarks integer;
+    -> declare grade varchar(20);
+    -> declare stud_name varchar(20);
+    -> select marks.total_marks, marks.name into fmarks, stud_name from marks where marks.roll_no=R1;
+    -> call proc_result(fmarks, grade);
+    -> insert into result values(R1, stud_name, grade);
+    -> return R1;
+    -> end;
+    -> //
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> select fresult(2);
+    -> //
++------------+
+| fresult(2) |
++------------+
+|          2 |
++------------+
+1 row in set (0.02 sec)
+
+mysql> select fresult(3);
+    -> //
++------------+
+| fresult(3) |
++------------+
+|          3 |
++------------+
+1 row in set (0.01 sec)
+
+mysql> select fresult(4);//
++------------+
+| fresult(4) |
++------------+
+|          4 |
++------------+
+1 row in set (0.01 sec)
+
+mysql> select fresult(5);//
++------------+
+| fresult(5) |
++------------+
+|          5 |
++------------+
+1 row in set (0.01 sec)
+
+mysql> select * from result;
+    -> //
++---------+--------+---------------------+
+| roll_no | name   | class               |
++---------+--------+---------------------+
+|       2 | Arman  | First Class         |
+|       3 | Raju   | Higher Second Class |
+|       4 | Rajeev | Fail                |
+|       5 | akshay | Passed              |
++---------+--------+---------------------+
+4 rows in set (0.00 sec)
+
+mysql>
+
