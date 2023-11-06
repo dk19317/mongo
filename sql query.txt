@@ -1,0 +1,39 @@
+index
+create index index_name on table_name(column1,col2);
+
+show indexes from table_name;
+
+select * from table_name where col_name = data;
+
+drop index index_name on tablename;
+
+drop foreign key
+check for constraints
+show create table tablename;
+
+alter table table name drop foriegn key constraint;
+
+truncate delete data but not table
+
+truncate table tablename
+
+alter table tablename rename to newname;
+
+alter table tablename rename column oldcolname to newcol;
+
+create view viewname as select col1,col2 from tablename;
+
+inner join ->This is the most common type of join. Inner joins combine records from two tables whenever there are matching values in a field common to both tables.
+
+select student.name, city.cityn from student inner join  city on student.id = city.cid;
+
+table connecting side by side
+
+select * from student s1, city c1 where s1.id != c1.cid;
+
+
+
+
+
+
+
